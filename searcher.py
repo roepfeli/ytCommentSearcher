@@ -25,8 +25,6 @@ with open("./config.json") as f:
 
 nextPageToken = None
 
-counter = 0
-
 while True:
 
     if nextPageToken:
@@ -39,14 +37,19 @@ while True:
     apiResultJSON = json.loads(apiResult.text)
 
     for commentObj in apiResultJSON["items"]:
-        counter += 1
         comment = commentObj["snippet"]["topLevelComment"]["snippet"]["textDisplay"]
         if re.match(sys.argv[2], comment):
             print(comment)
+
+        try:
+            replies = commentObj["replies"]["comments"]
+            for reply in replies:
+                if re.match(sys.argv[2], reply["snippet"]["textDisplay"]):
+                    print(reply["snippet"]["textDisplay"])
+        except KeyError:
+            pass
 
     try:
         nextPageToken = apiResultJSON["nextPageToken"]
     except KeyError:
         break
-
-print(counter)
